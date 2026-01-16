@@ -65,12 +65,18 @@ git push origin HEAD --tags
 
 # 7. Create GitHub Release
 log "Creating GitHub Release: $RELEASE_TITLE"
-RELEASE_FLAGS=(--title "$RELEASE_TITLE" --generate-notes)
+RELEASE_FLAGS=(
+    --title "$RELEASE_TITLE"
+    --generate-notes
+    --notes-start-tag "v$OLD_RELEASE"
+)
 
 # Process template if provided and exists
 if [ -n "$INPUT_GITHUB_RELEASE_TEMPLATE" ] && [ -f "$INPUT_GITHUB_RELEASE_TEMPLATE" ]; then
     log "Using release notes template: $INPUT_GITHUB_RELEASE_TEMPLATE"
-    sed "s#{VERSION}#$NEW_RELEASE#g" "$INPUT_GITHUB_RELEASE_TEMPLATE" > processed_notes.md
+    sed -e "s#{VERSION}#$NEW_RELEASE#gI" \
+        -e "s#{PREVIOUS_VERSION}#$OLD_RELEASE#gI" \
+        "$INPUT_GITHUB_RELEASE_TEMPLATE" > processed_notes.md
     RELEASE_FLAGS+=(--notes-file processed_notes.md)
 fi
 
