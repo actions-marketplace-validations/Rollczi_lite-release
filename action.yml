@@ -1,0 +1,67 @@
+name: 'Lite Release'
+description: 'Automated version management with customizable commit and release patterns.'
+author: 'Rollczi'
+branding:
+  icon: 'zap'
+  color: 'orange'
+
+inputs:
+  token:
+    description: 'GitHub Personal Access Token (PAT)'
+    required: true
+  bump_type:
+    description: 'Bump type: patch, minor, or major'
+    default: 'patch'
+  version_file:
+    description: 'Path to the version JSON file'
+    default: '.github/release/version.json'
+  commit_release_update_files:
+    description: 'Files to update during Release (e.g., README, Gradle, Poms)'
+    default: '**/*.gradle.kts, **/pom.xml, README.md'
+  commit_snapshot_update_files:
+    description: 'Files to update during Snapshot bump (usually just build files)'
+    default: '**/*.gradle.kts, **/pom.xml'
+
+  # Customizable Patterns
+  github_release_title:
+    description: 'Pattern for the GitHub Release title'
+    default: 'Release v{VERSION}'
+  commit_release:
+    description: 'Pattern for the release commit message'
+    default: 'Release {VERSION}'
+  commit_snapshot:
+    description: 'Pattern for the snapshot bump commit message'
+    default: 'Snapshot {VERSION}'
+
+  # Git Config
+  git_user_name:
+    description: 'Git user configuration for commits'
+    default: 'github-actions[bot]'
+  git_user_email:
+    description: 'Git email configuration for commits'
+    default: 'github-actions[bot]@users.noreply.github.com'
+
+  # RELEASE NOTES
+  github_release_template:
+    description: 'Optional path to a template file (e.g., .github/release/template.md)'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Execute Lite Release
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        INPUT_BUMP: ${{ inputs.bump_type }}
+        INPUT_COMMIT_RELEASE: ${{ inputs.commit_release }}
+        INPUT_COMMIT_RELEASE_FILES: ${{ inputs.commit_release_update_files }}
+        INPUT_COMMIT_SNAPSHOT: ${{ inputs.commit_snapshot }}
+        INPUT_COMMIT_SNAPSHOT_FILES: ${{ inputs.commit_snapshot_update_files }}
+        INPUT_GIT_USER: ${{ inputs.git_user_name }}
+        INPUT_GIT_EMAIL: ${{ inputs.git_user_email }}
+        INPUT_GITHUB_RELEASE_TITLE: ${{ inputs.github_release_title }}
+        INPUT_GITHUB_RELEASE_TEMPLATE: ${{ inputs.github_release_template }}
+        INPUT_VERSION_FILE: ${{ inputs.version_file }}
+      run: ${{ github.action_path }}/release.sh
